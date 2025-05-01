@@ -1,0 +1,237 @@
+import React, { useState, useMemo, useEffect, useRef } from 'react';
+
+// --- Ícones ---
+const SearchIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>;
+const FilterIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-700"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>;
+const ChevronDownIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>;
+const SendIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>;
+const XIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 text-gray-500 hover:text-gray-700"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>;
+const IssueIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-600"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>;
+const SystemIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>;
+const LinkIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>;
+const PaperclipIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>;
+const SmileIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>;
+const PhoneIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>;
+const PowerOffIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path><line x1="12" y1="2" x2="12" y2="12"></line></svg>;
+const CheckIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>;
+const ShareIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>;
+
+// --- Dados Iniciais ---
+const initialTicketsData = [
+  { id: '#59678', title: 'Designing com Adobe Illustrator', date: '9 de abril de 2026', sortDate: '2026-04-09', category: 'Algoritmos Ineficientes', user: 'Jane Austen', role: 'Designer Gráfico', issue: 'Problema com camadas complexas', status: 'Médio', statusPriority: 2, tabStatus: 'Ativos' },
+  { id: '#21234', title: 'Criando Logos Incríveis', date: '28 de fevereiro de 2020', sortDate: '2020-02-28', category: 'Gargalos no Fluxo de Trabalho', user: 'JK Rowling', role: 'Escritora', issue: 'Dúvida sobre exportação', status: 'Alto', statusPriority: 3, tabStatus: 'Ativos' },
+  { id: '#39678', title: 'Essenciais da Programação Python', date: '8 de janeiro de 2020', sortDate: '2020-01-08', category: 'Development Issue', user: 'Emily Brontë', role: 'CEO at UIStudio', issue: 'Facing Problem Into Development System', status: 'Fechado', statusPriority: 2, tabStatus: 'Pendentes' },
+  { id: '#71789', title: 'Marketing Efetivo em Mídias Sociais', date: '7 de março de 2026', sortDate: '2026-03-07', category: 'Bibliotecas Depreciadas', user: 'George Orwell', role: 'Analista de Marketing', issue: 'Erro ao agendar posts', status: 'Alto', statusPriority: 3, tabStatus: 'Pendentes' },
+];
+
+// --- Componente Badge de Status ---
+const StatusBadge = ({ status }) => {
+  let bgColor = ''; let textColor = '';
+  let translatedStatus = status;
+  switch (status?.toLowerCase()) {
+    case 'alto': bgColor = 'bg-red-100'; textColor = 'text-red-700'; translatedStatus = 'Alto'; break;
+    case 'médio': bgColor = 'bg-blue-100'; textColor = 'text-blue-600'; translatedStatus = 'Médio'; break;
+    case 'baixo': bgColor = 'bg-green-100'; textColor = 'text-green-700'; translatedStatus = 'Baixo'; break;
+    case 'fechado': case 'closed': bgColor = 'bg-gray-100'; textColor = 'text-gray-500'; translatedStatus = 'Fechado'; break;
+    default: bgColor = 'bg-gray-100'; textColor = 'text-gray-700'; translatedStatus = status;
+  }
+  return <span className={`px-2 py-0.5 rounded text-xs font-medium ${bgColor} ${textColor} cursor-default`}>{translatedStatus}</span>;
+};
+
+// --- ChatInterfacePopup ---
+const ChatInterfacePopup = ({ ticket, onClose, onCall, onFinish, onAccept, onTransfer }) => {
+    const modalRef = useRef(null);
+    const handleOverlayClick = (e) => { if (modalRef.current && !modalRef.current.contains(e.target)) { onClose(); } };
+    const messages = [ /* ... mensagens ... */ ];
+    useEffect(() => { /* ... efeito overflow ... */ }, [ticket]);
+    if (!ticket) return null;
+    const getPriorityText = (status) => { /* ... */ };
+
+    return (
+      <div className="fixed inset-0 bg-black/50 flex justify-end z-40" onClick={handleOverlayClick}>
+        <div ref={modalRef} className="w-full max-w-md lg:max-w-lg h-full bg-white shadow-xl flex flex-col">
+          {/* Cabeçalho do Chat */}
+          <div className="p-4 border-b border-gray-200 bg-white flex-shrink-0">
+             <div className="flex justify-between items-center mb-4"> <div className="flex items-center gap-2"> <IssueIcon /> <h3 className="text-base font-medium text-gray-700">Problema do Cliente</h3> </div> <button onClick={onClose} className="text-gray-400 hover:text-gray-600 cursor-pointer" title="Fechar Chat"> <XIcon /> </button> </div>
+             <div className="flex justify-between items-start mb-4">
+                <div className="flex items-center"> <img className="w-10 h-10 rounded-full mr-3 object-cover" src={`https://i.pravatar.cc/40?u=${ticket.user}`} alt={ticket.user} onError={(e) => e.target.src='https://placehold.co/40x40/E2E8F0/AAAAAA?text=?'} /> <div> <div className="flex items-center gap-1.5"> <p className="font-semibold text-sm text-gray-900">{ticket.user}</p> {ticket.tabStatus === 'Ativos' && ( <> <button onClick={() => onCall(ticket.id)} title="Ligar para o cliente" className="p-1 text-blue-600 hover:bg-blue-100 rounded-full focus:outline-none focus:ring-1 focus:ring-blue-500"> <PhoneIcon /> </button> <button onClick={() => onFinish(ticket.id)} title="Finalizar Chamado" className="p-1 text-red-600 hover:bg-red-100 rounded-full focus:outline-none focus:ring-1 focus:ring-red-500"> <PowerOffIcon /> </button> <button onClick={() => onTransfer(ticket)} title="Transferir Chamado" className="p-1 text-purple-600 hover:bg-purple-100 rounded-full focus:outline-none focus:ring-1 focus:ring-purple-500"> <ShareIcon /> </button> </> )} {ticket.tabStatus === 'Pendentes' && ( <button onClick={() => onAccept(ticket.id)} title="Aceitar Ticket" className="p-1 text-green-600 hover:bg-green-100 rounded-full focus:outline-none focus:ring-1 focus:ring-green-500"> <CheckIcon /> </button> )} </div> <p className="text-xs text-gray-500">{ticket.role || 'Cliente'}</p> </div> </div>
+                <div className="text-right"> <div className="flex items-center justify-end gap-1 text-blue-600 text-xs font-medium"> <SystemIcon /> <span>Sistema</span> </div> <p className="text-xs text-gray-500 mt-1">{ticket.issue || 'Não especificado'}</p> </div>
+             </div>
+             <div className="bg-gray-50 border border-gray-200 rounded-lg p-3"> <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-2 text-xs"> <div> <p className="text-gray-500 mb-0.5">Código do Ticket</p> <p className="font-medium text-gray-800">{ticket.id}</p> </div> <div> <p className="text-gray-500 mb-0.5">Categoria</p> <p className="font-medium text-gray-800">{ticket.category}</p> </div> <div> <p className="text-gray-500 mb-0.5">Status do Ticket</p> <StatusBadge status={ticket.status} /> </div> <div> <p className="text-gray-500 mb-0.5">Prioridade do Ticket</p> <StatusBadge status={getPriorityText(ticket.status)} /> </div> </div> </div>
+           </div>
+           {/* Área de Mensagens */}
+           <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-white pb-4"> {messages.map((msg) => ( <div key={msg.id} className={`flex items-start gap-2.5 ${msg.sender === 'user' ? 'justify-start' : 'justify-end'}`}> {msg.sender === 'user' && ( <img className="w-6 h-6 rounded-full object-cover" src={`https://i.pravatar.cc/24?u=${ticket.user}`} alt={ticket.user} onError={(e) => e.target.src='https://placehold.co/24x24/E2E8F0/AAAAAA?text=?'}/> )} <div className={`flex flex-col max-w-xs lg:max-w-md ${msg.sender === 'user' ? '' : 'items-end'}`}> <div className={`px-3 py-2 rounded-lg ${msg.sender === 'user' ? 'bg-gray-100 text-gray-800 rounded-tl-none' : 'bg-blue-50 text-gray-800 rounded-tr-none border border-blue-200'}`}> <p className="text-sm font-normal leading-snug">{msg.text}</p> </div> <p className={`text-xs mt-1 ${msg.sender === 'user' ? 'text-gray-400' : 'text-gray-400'}`}>{msg.time}</p> </div> {msg.sender === 'agent' && ( <img className="w-6 h-6 rounded-full object-cover" src={`https://i.pravatar.cc/24?u=agent`} alt="Agent" onError={(e) => e.target.src='https://placehold.co/24x24/E2E8F0/AAAAAA?text=A'}/> )} </div> ))} </div>
+           {/* Input de Mensagem */}
+           <div className="p-4 border-t border-gray-200 bg-gray-50 flex-shrink-0"> <div className="flex items-center space-x-3"> <button className="text-gray-500 hover:text-gray-700"><LinkIcon /></button> <button className="text-gray-500 hover:text-gray-700"><PaperclipIcon /></button> <input type="text" placeholder="Digite a mensagem..." className="flex-1 block w-full px-3 py-2 border-none rounded-md shadow-none placeholder-gray-400 focus:outline-none focus:ring-0 sm:text-sm bg-transparent" /> <button className="text-gray-500 hover:text-gray-700"><SmileIcon /></button> <button className="inline-flex items-center justify-center p-2.5 border border-transparent rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 cursor-pointer"> <SendIcon /> </button> </div> </div>
+        </div>
+      </div>
+    );
+};
+
+// --- TransferTicketModal ---
+const TransferTicketModal = ({ isOpen, onClose, ticket, onConfirmTransfer }) => {
+    const [selectedDepartment, setSelectedDepartment] = useState('');
+    const [selectedPerson, setSelectedPerson] = useState('');
+    const modalRef = useRef(null);
+    const departments = { 'Suporte N1': ['Ana Silva', 'Bruno Costa'], 'Suporte N2': ['Carlos Dias', 'Daniela Lima'], 'Desenvolvimento': ['Eduardo Rocha', 'Fernanda Melo'], };
+    const peopleInDepartment = departments[selectedDepartment] || [];
+    useEffect(() => { setSelectedPerson(''); }, [selectedDepartment]);
+    const handleOverlayClick = (e) => { if (modalRef.current && !modalRef.current.contains(e.target)) { onClose(); } };
+    const handleTransfer = () => { if (selectedDepartment && selectedPerson) { onConfirmTransfer(ticket.id, selectedDepartment, selectedPerson); onClose(); } else { alert("Por favor, selecione um setor e uma pessoa."); } };
+    if (!isOpen || !ticket) return null;
+    return ( <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50" onClick={handleOverlayClick}> <div ref={modalRef} className="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm mx-4"> <div className="flex justify-between items-center mb-4"> <h3 className="text-lg font-medium text-gray-900">Transferir Ticket {ticket.id}</h3> <button onClick={onClose} className="text-gray-400 hover:text-gray-600 cursor-pointer"> <XIcon /> </button> </div> <div className="space-y-4"> <div> <label htmlFor="department" className="block text-sm font-medium text-gray-700 mb-1">Transferir para qual setor?</label> <select id="department" value={selectedDepartment} onChange={(e) => setSelectedDepartment(e.target.value)} className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"> <option value="" disabled>Selecione um setor</option> {Object.keys(departments).map(dept => ( <option key={dept} value={dept}>{dept}</option> ))} </select> </div> {selectedDepartment && ( <div> <label htmlFor="person" className="block text-sm font-medium text-gray-700 mb-1">Para quem?</label> <select id="person" value={selectedPerson} onChange={(e) => setSelectedPerson(e.target.value)} className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" disabled={peopleInDepartment.length === 0}> <option value="" disabled>Selecione uma pessoa</option> {peopleInDepartment.map(person => ( <option key={person} value={person}>{person}</option> ))} {peopleInDepartment.length === 0 && <option disabled>Nenhuma pessoa neste setor</option>} </select> </div> )} </div> <div className="mt-6 flex justify-end gap-3"> <button type="button" onClick={onClose} className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 cursor-pointer"> Cancelar </button> <button type="button" onClick={handleTransfer} disabled={!selectedDepartment || !selectedPerson} className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"> Transferir </button> </div> </div> </div> );
+};
+
+// --- Componente Principal ---
+function TicketSystemWithChatPopup() {
+  const [tickets, setTickets] = useState(initialTicketsData);
+  const [activeTab, setActiveTab] = useState('Pendentes');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState('default');
+  const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
+  const [selectedStatuses, setSelectedStatuses] = useState([]);
+  const [tempSelectedStatuses, setTempSelectedStatuses] = useState([]);
+  const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false);
+  const [selectedTicket, setSelectedTicket] = useState(null);
+  const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
+  const [ticketToTransfer, setTicketToTransfer] = useState(null);
+
+  const sortDropdownRef = useRef(null);
+  const filterDropdownRef = useRef(null);
+
+  const tabCounts = useMemo(() => tickets.reduce((acc, ticket) => { acc[ticket.tabStatus] = (acc[ticket.tabStatus] || 0) + 1; return acc; }, {}), [tickets]);
+  const uniqueStatuses = useMemo(() => [...new Set(tickets.map(ticket => ticket.status))], [tickets]);
+
+  useEffect(() => { /* ... efeito click outside ... */ }, [isSortDropdownOpen, isFilterDropdownOpen]);
+  const toggleDropdown = (type) => { /* ... */ };
+  const handleSortDropdownToggle = () => toggleDropdown('sort');
+  const handleFilterDropdownToggle = () => toggleDropdown('filter');
+  const handleSortChange = (criteria) => { setSortBy(criteria); toggleDropdown(null); };
+  const handleFilterStatusChange = (status) => { setTempSelectedStatuses(prev => prev.includes(status) ? prev.filter(s => s !== status) : [...prev, status]); };
+  const applyFilters = () => { setSelectedStatuses([...tempSelectedStatuses]); toggleDropdown(null); };
+  const clearFilters = () => { setSelectedStatuses([]); setTempSelectedStatuses([]); toggleDropdown(null); };
+
+   const handleAcceptTicket = (ticketId) => {
+        setTickets(currentTickets =>
+            currentTickets.map(ticket =>
+                ticket.id === ticketId ? { ...ticket, tabStatus: 'Ativos' } : ticket
+            )
+        );
+        handleCloseChat();
+   };
+
+   const handleFinishTicketAction = (ticketId) => {
+        console.log("Finalizando ticket:", ticketId);
+        setTickets(currentTickets =>
+            currentTickets.map(ticket =>
+                ticket.id === ticketId ? { ...ticket, tabStatus: 'Finalizadas', status: 'Fechado' } : ticket
+            )
+        );
+        if (selectedTicket && selectedTicket.id === ticketId) {
+            handleCloseChat();
+        }
+   };
+
+   const handleCallUser = (ticketId) => { /* ... */ };
+   const handleSelectTicket = (ticket) => { setSelectedTicket(ticket); setIsSortDropdownOpen(false); setIsFilterDropdownOpen(false); };
+   const handleCloseChat = () => { setSelectedTicket(null); }
+   const openTransferModal = (ticket) => { setTicketToTransfer(ticket); setIsTransferModalOpen(true); setSelectedTicket(null); setIsSortDropdownOpen(false); setIsFilterDropdownOpen(false); };
+   const closeTransferModal = () => { setIsTransferModalOpen(false); setTicketToTransfer(null); };
+   const handleConfirmTransfer = (ticketId, department, person) => { console.log(`Transferindo ticket ${ticketId} para ${person} no setor ${department}`); setTickets(currentTickets => currentTickets.filter(t => t.id !== ticketId)); closeTransferModal(); };
+
+  const filteredTickets = useMemo(() => {
+    const tabFiltered = tickets.filter(ticket => ticket.tabStatus === activeTab);
+    return tabFiltered.filter(ticket => {
+        const matchesSearch = (searchTerm === '' || ticket.title.toLowerCase().includes(searchTerm.toLowerCase()) || ticket.id.toLowerCase().includes(searchTerm.toLowerCase()) || ticket.category.toLowerCase().includes(searchTerm.toLowerCase()) || ticket.user.toLowerCase().includes(searchTerm.toLowerCase()));
+        if (!matchesSearch) return false;
+        const matchesStatus = selectedStatuses.length === 0 || selectedStatuses.includes(ticket.status);
+        return matchesStatus;
+    });
+  }, [tickets, activeTab, searchTerm, selectedStatuses]);
+
+  const sortedTickets = useMemo(() => {
+    const sortableTickets = [...filteredTickets];
+    switch (sortBy) {
+      case 'date': sortableTickets.sort((a, b) => new Date(b.sortDate) - new Date(a.sortDate)); break;
+      case 'status': sortableTickets.sort((a, b) => b.statusPriority - a.statusPriority); break;
+      default: break;
+    }
+    return sortableTickets;
+  }, [filteredTickets, sortBy]);
+
+  const totalEntriesForTab = useMemo(() => tickets.filter(t => t.tabStatus === activeTab).length, [tickets, activeTab]);
+
+  return (
+    // *** CLASSE h-screen REMOVIDA AQUI ***
+    <div className="relative overflow-hidden">
+      {/* Conteúdo da Tabela */}
+      <div className="p-4 md:p-6 bg-white shadow-sm font-sans h-full flex flex-col">
+        {/* Abas e Controles Superiores */}
+        <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4 flex-shrink-0">
+          {/* Abas */}
+          <div className="flex border-b border-gray-200">
+            <button onClick={() => { setActiveTab('Ativos'); setSelectedTicket(null); }} className={`py-2 px-4 text-sm font-medium cursor-pointer ${activeTab === 'Ativos' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}> Ativos ({tabCounts['Ativos'] || 0}) </button>
+            <button onClick={() => { setActiveTab('Pendentes'); setSelectedTicket(null); }} className={`py-2 px-4 text-sm font-medium cursor-pointer ${activeTab === 'Pendentes' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}> Pendentes ({tabCounts['Pendentes'] || 0}) </button>
+            <button onClick={() => { setActiveTab('Finalizadas'); setSelectedTicket(null); }} className={`py-2 px-4 text-sm font-medium cursor-pointer ${activeTab === 'Finalizadas' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}> Finalizadas ({tabCounts['Finalizadas'] || 0}) </button>
+          </div>
+          {/* Controles */}
+          <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
+             <div className="relative w-full sm:w-auto"> <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><SearchIcon /></div> <input type="text" placeholder="Pesquisar..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" /> </div>
+             <div className="relative w-full sm:w-auto" ref={filterDropdownRef}> <button onClick={handleFilterDropdownToggle} className="flex items-center gap-1 px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 w-full justify-center cursor-pointer"> <FilterIcon /> Filtrar {selectedStatuses.length > 0 ? `(${selectedStatuses.length})` : ''} </button> {isFilterDropdownOpen && ( <div className="absolute right-0 mt-2 w-60 bg-white rounded-md shadow-lg z-30 border border-gray-200 p-4"> <h4 className="text-sm font-medium text-gray-900 mb-3">Filtrar por Status</h4> <div className="space-y-2 mb-4"> {uniqueStatuses.map(status => ( <label key={status} className="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer"> <input type="checkbox" className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-offset-0 focus:ring-blue-200 focus:ring-opacity-50 cursor-pointer" checked={tempSelectedStatuses.includes(status)} onChange={() => handleFilterStatusChange(status)} /> <span><StatusBadge status={status} /></span> </label> ))} </div> <div className="flex justify-end gap-2 border-t border-gray-200 pt-3"> <button onClick={clearFilters} className="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"> Limpar </button> <button onClick={applyFilters} className="px-3 py-1 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 cursor-pointer"> Aplicar </button> </div> </div> )} </div>
+             <div className="relative w-full sm:w-auto" ref={sortDropdownRef}> <button onClick={handleSortDropdownToggle} className="flex items-center gap-1 px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 w-full justify-center cursor-pointer"> Ordenar por <ChevronDownIcon /> </button> {isSortDropdownOpen && ( <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-30 border border-gray-200"> <a href="#" onClick={(e) => { e.preventDefault(); handleSortChange('default'); }} className={`block px-4 py-2 text-sm cursor-pointer ${sortBy === 'default' ? 'bg-gray-100 text-gray-900' : 'text-gray-700 hover:bg-gray-100'}`}>Padrão</a> <a href="#" onClick={(e) => { e.preventDefault(); handleSortChange('date'); }} className={`block px-4 py-2 text-sm cursor-pointer ${sortBy === 'date' ? 'bg-gray-100 text-gray-900' : 'text-gray-700 hover:bg-gray-100'}`}>Chegada (Recente)</a> <a href="#" onClick={(e) => { e.preventDefault(); handleSortChange('status'); }} className={`block px-4 py-2 text-sm cursor-pointer ${sortBy === 'status' ? 'bg-gray-100 text-gray-900' : 'text-gray-700 hover:bg-gray-100'}`}>Status (Prioridade)</a> </div> )} </div>
+          </div>
+        </div>
+
+        {/* Tabela */}
+        <div className="flex-grow overflow-y-auto">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50 sticky top-0 z-10">
+                <tr>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">ID do Ticket</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">Título</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">Categoria</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">Nome do Usuário</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">Status</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">Ações</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {sortedTickets.map((ticket) => ( <tr key={ticket.id} onClick={() => handleSelectTicket(ticket)} className={`hover:bg-gray-100 cursor-pointer ${selectedTicket?.id === ticket.id ? 'bg-blue-50' : ''}`} > <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{ticket.id}</td> <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900"> <div>{ticket.title}</div> <div className="text-xs text-gray-500">{ticket.date}</div> </td> <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{ticket.category}</td> <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{ticket.user}</td> <td className="px-4 py-3 whitespace-nowrap text-sm"><StatusBadge status={ticket.status} /></td>
+                 <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-center"> {activeTab === 'Ativos' && ( <button onClick={(e) => { e.stopPropagation(); openTransferModal(ticket); }} title="Transferir Ticket" className="p-1 text-purple-600 hover:bg-purple-100 rounded-full focus:outline-none focus:ring-1 focus:ring-purple-500 inline-block"> <ShareIcon /> </button> )} {(activeTab === 'Pendentes' || activeTab === 'Finalizadas') && <span>&nbsp;</span>} </td>
+                 </tr> ))}
+                {sortedTickets.length === 0 && ( <tr> <td colSpan="6" className="text-center py-4 text-sm text-gray-500"> Nenhum ticket encontrado para "{activeTab}"{searchTerm || selectedStatuses.length > 0 ? ' com os filtros aplicados' : ''}. </td> </tr> )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Paginação */}
+        <div className="flex-shrink-0 flex flex-col sm:flex-row justify-between items-center mt-4 pt-4 border-t border-gray-200">
+          <p className="text-sm text-gray-700 mb-2 sm:mb-0"> Mostrando resultados {sortedTickets.length > 0 ? '1-' : ''}{sortedTickets.length} de {totalEntriesForTab} entradas {selectedStatuses.length > 0 || searchTerm ? '(filtradas)' : ''} </p>
+          <div className="flex gap-2"> <button className="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" disabled>Anterior</button> <button className="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer">Próximo</button> </div>
+        </div>
+      </div>
+
+      {/* Renderiza o Chat Popup */}
+      <ChatInterfacePopup
+        ticket={selectedTicket}
+        onClose={handleCloseChat}
+        onCall={handleCallUser}
+        onFinish={handleFinishTicketAction}
+        onAccept={handleAcceptTicket}
+        onTransfer={openTransferModal}
+      />
+
+      {/* Renderiza o Modal de Transferência */}
+      <TransferTicketModal
+        isOpen={isTransferModalOpen}
+        onClose={closeTransferModal}
+        ticket={ticketToTransfer}
+        onConfirmTransfer={handleConfirmTransfer}
+      />
+    </div>
+  );
+}
+
+export default TicketSystemWithChatPopup;
