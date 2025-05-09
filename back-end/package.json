@@ -1,0 +1,17 @@
+{
+  "name": "test",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "input": "^1.0.1",
+    "koa": "^3.0.0",
+    "telegram": "^2.26.22"
+  }
+}

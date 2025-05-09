@@ -12,11 +12,13 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.1.4",
     "chart.js": "^4.4.9",
+    "input": "^1.0.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.5.3",
     "styled-components": "^6.1.17",
-    "tailwindcss": "^4.1.4"
+    "tailwindcss": "^4.1.4",
+    "telegram": "^2.26.22"
   },
   "devDependencies": {
     "@eslint/js": "^9.22.0",

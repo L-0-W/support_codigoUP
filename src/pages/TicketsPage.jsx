@@ -1,19 +1,9 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import {Styled} from 'styled-components'
-// Note: The original code included an import for a CSS file:
-// import './manualCss/TicketsPage.css'
-// This file is not provided. The component relies heavily on Tailwind CSS classes.
-// The class 'max-h-manual' was found in the table container div,
-// suggesting custom CSS might be needed for the desired table height/scroll behavior.
-// For now, I'll replace 'max-h-manual' with a standard Tailwind class like 'max-h-[500px]' or 'h-[500px]'.
-// You might need to adjust this or provide the CSS content.
-
-// --- Ícones ---
-// SVG Icon Components
+import { styled } from 'styled-components'
 
 const TableContentDiv = styled.div`
   overflow-y: auto;
-  max-hight: 300px
+  max-height: 300px;
 `
 
 
@@ -37,6 +27,7 @@ const RefreshCwIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" h
 // --- Dados Iniciais ---
 // Mock data for the tickets
 const initialTicketsData = [
+  /*
   { id: '#59678', title: 'Designing com Adobe Illustrator', date: '9 de abril de 2026', sortDate: '2026-04-09', category: 'Algoritmos Ineficientes', user: 'Jane Austen', role: 'Designer Gráfico', issue: 'Problema com camadas complexas', status: 'Médio', statusPriority: 2, tabStatus: 'Ativos' },
   { id: '#21234', title: 'Criando Logos Incríveis', date: '28 de fevereiro de 2020', sortDate: '2020-02-28', category: 'Gargalos no Fluxo de Trabalho', user: 'JK Rowling', role: 'Escritora', issue: 'Dúvida sobre exportação', status: 'Alto', statusPriority: 3, tabStatus: 'Ativos' },
   { id: '#39678', title: 'Essenciais da Programação Python', date: '8 de janeiro de 2020', sortDate: '2020-01-08', category: 'Development Issue', user: 'Emily Brontë', role: 'CEO at UIStudio', issue: 'Facing Problem Into Development System', status: 'Fechado', statusPriority: 1, tabStatus: 'Finalizadas' },
@@ -48,6 +39,7 @@ const initialTicketsData = [
   { id: '#44557', title: 'Relatório Financeiro Incorreto', date: '2 de maio de 2026', sortDate: '2026-05-02', category: 'Financeiro', user: 'Virginia Woolf', role: 'Contadora', issue: 'Valores não batem no Q1', status: 'Alto', statusPriority: 3, tabStatus: 'Pendentes' },
   { id: '#66778', title: 'Servidor Web Lento', date: '3 de maio de 2026', sortDate: '2026-05-03', category: 'Infraestrutura', user: 'James Joyce', role: 'DevOps', issue: 'Alto tempo de resposta TTFB', status: 'Médio', statusPriority: 2, tabStatus: 'Ativos' },
   { id: '#88990', title: 'Dúvida sobre API', date: '4 de maio de 2026', sortDate: '2026-05-04', category: 'Desenvolvimento', user: 'F. Scott Fitzgerald', role: 'Desenvolvedor', issue: 'Como autenticar requests?', status: 'Baixo', statusPriority: 1, tabStatus: 'Ativos' },
+  */
 ];
 
 // --- Componente Badge de Status ---
@@ -66,9 +58,7 @@ const StatusBadge = ({ status }) => {
   return <span className={`px-2 py-0.5 rounded text-xs font-medium ${bgColor} ${textColor} cursor-default`}>{translatedStatus}</span>;
 };
 
-// --- ChatInterfacePopup ---
-// Displays a chat interface in a side popup/modal when a ticket is selected
-const ChatInterfacePopup = ({ ticket, onClose, onCall, onFinish, onAccept, onTransfer }) => {
+const ChatInterfacePopup = ({ ticket, onClose, onCall, onFinish, onAccept, onTransfer, socket, tickets }) => {
     const modalRef = useRef(null); // Ref for the modal content
     const chatMessagesRef = useRef(null); // Ref for the messages container to enable auto-scroll
 
@@ -111,7 +101,7 @@ const ChatInterfacePopup = ({ ticket, onClose, onCall, onFinish, onAccept, onTra
       // Overlay for the popup
       <div className="fixed inset-0 bg-black/50 flex justify-end z-40" onClick={handleOverlayClick}>
         {/* Popup Content */}
-        <div ref={modalRef} className="w-full max-w-md lg:max-w-lg h-full bg-white shadow-xl flex flex-col">
+        <div ref={modalRef} className="w-full max-w-[50%] h-full bg-white shadow-xl flex flex-col">
 
           {/* Chat Header */}
           <div className="p-4 border-b border-gray-200 bg-white flex-shrink-0">
@@ -188,9 +178,25 @@ const ChatInterfacePopup = ({ ticket, onClose, onCall, onFinish, onAccept, onTra
              <div className="flex items-center space-x-2 sm:space-x-3">
                <button className="text-gray-500 hover:text-gray-700 p-1 rounded hover:bg-gray-200 hidden sm:inline-block"><LinkIcon /></button>
                <button className="text-gray-500 hover:text-gray-700 p-1 rounded hover:bg-gray-200"><PaperclipIcon /></button>
-               <input type="text" placeholder="Mensagem..." className="flex-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white" />
+               <input type="text" placeholder="Mensagem..." id="inputGetValue" className="flex-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white" />
                <button className="text-gray-500 hover:text-gray-700 p-1 rounded hover:bg-gray-200 hidden sm:inline-block"><SmileIcon /></button>
-               <button className="inline-flex items-center justify-center p-2.5 border border-transparent rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 cursor-pointer"> <SendIcon /> </button>
+               <button 
+               onClick={() => {
+                const input = document.getElementById("inputGetValue");
+
+                const Invalue = input.value;
+
+                const json_string = {
+                  type: "msg",
+                  socketId: ticket.socketId,
+                  message: `${Invalue}`
+                }
+
+                socket.send(JSON.stringify(json_string));
+               }} 
+               className="inline-flex items-center justify-center p-2.5 border border-transparent rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 cursor-pointer"> 
+               <SendIcon /> 
+               </button>
              </div>
            </div>
 
@@ -330,6 +336,7 @@ function TicketSystemWithChatPopup() {
   const [selectedTicket, setSelectedTicket] = useState(null); // The ticket currently selected to show in the chat popup
   const [isTransferModalOpen, setIsTransferModalOpen] = useState(false); // Visibility of the transfer modal
   const [ticketToTransfer, setTicketToTransfer] = useState(null); // Ticket selected for transfer
+  const [socket, setSocket] = useState(new WebSocket('ws://localhost:3000'));
 
   // --- Refs ---
   const sortDropdownRef = useRef(null); // Ref for the sort dropdown element
@@ -352,6 +359,39 @@ function TicketSystemWithChatPopup() {
 
   // --- Effects ---
   // Effect to handle clicks outside dropdowns to close them
+  useEffect(() => {
+
+    socket.addEventListener("message", (event) => {
+        const json_obj = JSON.parse(event.data)
+        const type_message = json_obj.type;
+
+        console.log(json_obj);
+        console.log(type_message);
+
+        if (type_message === "iniciate_ticket") {
+          let newTicket = { 
+            id: json_obj.ticket_id,
+            socketId: json_obj.socketId,
+            title: json_obj.msg_message, 
+            date: json_obj.msg_date, 
+            sortDate: json_obj.msg_sortdate, 
+            category: 'Algoritmos Ineficientes', 
+            user: json_obj.user_name, 
+            role: 'Designer Gráfico', 
+            issue: 'Problema com camadas complexas', 
+            status: 'Médio', 
+            statusPriority: 2, 
+            tabStatus: 'Pendentes' 
+          }
+          setTickets((prevState) => [...prevState, newTicket]);
+      }
+    });
+    
+    socket.addEventListener("open", (event) => {
+        socket.send("a");
+        console.log("a")
+    });
+  })
   useEffect(() => {
     const handleClickOutside = (event) => {
       // Close sort dropdown
@@ -434,6 +474,16 @@ function TicketSystemWithChatPopup() {
     if (selectedTicket && selectedTicket.id === ticketId) {
       handleCloseChat();
     }
+
+    tickets.map(currentTicket => {
+      const json_send = {
+        type: "update",
+        socketId: currentTicket.socketId,
+        status: "accept"  
+      }
+
+      currentTicket.id === ticketId ? socket.send(JSON.stringify(json_send)) : ''
+    });
   };
 
   // Finish an active ticket, moving it to 'Finalizadas' and setting status to 'Fechado'
@@ -662,15 +712,11 @@ function TicketSystemWithChatPopup() {
             </div>
           </div>
         </div>
-
-        {/* Main Body: Ticket Table (Scrollable) */}
-        {/* Replaced 'max-h-manual' with 'max-h-[500px]' - Adjust height as needed */}
-        <TableContentDiv className="overflow-y-auto px-4 max-h-[500px]"> {/* Vertical scroll container */}
-          {/* Horizontal scroll container for the table */}
+            
+        <TableContentDiv> 
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
-              {/* Sticky Table Header */}
-              <thead className="bg-gray-50 sticky top-0 z-10">
+            <thead className="bg-gray-50 z-10 p-3.4">
                 <tr>
                   <th scope="col" className="py-3 pl-4 pr-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500 sm:pl-6 w-24">ID</th>
                   <th scope="col" className="px-3 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Título</th>
@@ -679,8 +725,7 @@ function TicketSystemWithChatPopup() {
                   <th scope="col" className="px-3 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500 w-28">Status</th>
                   <th scope="col" className="relative py-3 pl-3 pr-4 sm:pr-6 text-center text-xs font-medium uppercase tracking-wide text-gray-500 w-24">Ações</th>
                 </tr>
-              </thead>
-              {/* Table Body */}
+        </thead>
               <tbody className="divide-y divide-gray-200 bg-white">
                 {sortedTickets.map((ticket) => (
                   <tr
@@ -754,6 +799,8 @@ function TicketSystemWithChatPopup() {
             onFinish={handleFinishTicketAction}
             onAccept={handleAcceptTicket}
             onTransfer={openTransferModal}
+            socket={socket}
+            tickets={tickets}
         />
       )}
       {/* Transfer Modal: Rendered conditionally */}
